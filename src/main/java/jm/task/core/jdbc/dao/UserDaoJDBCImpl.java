@@ -6,9 +6,11 @@ import jm.task.core.jdbc.util.Util;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Logger;
 
 public class UserDaoJDBCImpl implements UserDao {
     private static final Connection connection = Util.getNewConnection();
+    private static final Logger logger = Logger.getLogger(UserDaoJDBCImpl.class.getName());
 
     public UserDaoJDBCImpl() {
 
@@ -23,10 +25,10 @@ public class UserDaoJDBCImpl implements UserDao {
                     "lastName VARCHAR(45) NOT NULL, " +
                     "age INT(3) NOT NULL," +
                     "PRIMARY KEY(id))");
-            System.out.println("Таблица создана");
+            logger.info("Table created successfully");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.warning("Error creating table");
         }
 
     }
@@ -47,9 +49,9 @@ public class UserDaoJDBCImpl implements UserDao {
             preparedStatement.setString(2, lastName);
             preparedStatement.setByte(3, age);
             preparedStatement.executeUpdate();
-            System.out.println("User с именем " + name + " добавлен в базу данных");
+            logger.info("User с именем " + name + " добавлен в базу данных");
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.warning("Ошибка при сохранении пользователя");
         }
     }
 
@@ -68,6 +70,7 @@ public class UserDaoJDBCImpl implements UserDao {
 
         List<User> userList = new ArrayList<>();
         try (Statement statement = connection.createStatement()) {
+            logger.info("Getting all users from the database");
             ResultSet resultSet = statement.executeQuery("SELECT * FROM users");
 
             while (resultSet.next()) {
@@ -79,17 +82,19 @@ public class UserDaoJDBCImpl implements UserDao {
                 userList.add(user);
             }
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.warning("Error getting all users from the database");
         }
+        logger.info("Returning user list with size");
         return userList;
     }
 
     public void cleanUsersTable() {
         try (Statement statement = connection.createStatement()) {
             statement.executeUpdate("DELETE FROM users");
+            logger.info("Users table cleaned successfully");
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            logger.warning("Error cleaning users table");
         }
     }
 }
